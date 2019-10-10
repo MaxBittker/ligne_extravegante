@@ -7,7 +7,7 @@ void ofApp::setup() {}
 void ofApp::update() {}
 
 //--------------------------------------------------------------
-
+const bool debug = true;
 ofColor topColor = ofColor::fromHex(0x0B1021);
 ofColor bottomColor = ofColor::fromHex(0x131E53);
 void ofApp::draw(
@@ -16,20 +16,17 @@ void ofApp::draw(
 
   ofBackgroundHex(0xACB7EA);
 
-  float w = (750 - 50) / 5.0;
-  float h = (750 - 50) / 5.0;
-
   ofSeedRandom(mouseX * 1000);
   ofPoint startPoint = ofPoint(mouseX, mouseY);
-  //   float x = 200;
-  //   float y = 200;
+
   float stripWidth = 50;
 
   float length = 3000;
-  float angleRange = 80;
+  int attempts = 0;
+draw:
 
   float previousAngle = ofRandom(0, 360); // degrees
-  float currentAngle = previousAngle;
+  float currentAngle = previousAngle + 180;
   float nextAngle = previousAngle;
 
   // float previousAngle = angle;
@@ -37,31 +34,36 @@ void ofApp::draw(
   int side = 0;
   while (true) {
 
-    float stripLength = stripWidth + ofRandom(0, 100);
+    float stripLength = 25 + ofRandom(0, 200);
 
     length -= stripLength;
     // cout << length << "\n";
-    if (length < 0) {
-      break;
-    }
+
     if (side == 0) {
-      ofSetColor(topColor, 200); // top
+      ofSetColor(topColor, 220); // top
     } else {
-      ofSetColor(bottomColor, 200); // bottom
+      ofSetColor(bottomColor, 220); // bottom
     }
     side = (side + 1) % 2;
 
     // calculate next angle
-    nextAngle = currentAngle + ((ofRandomf() * angleRange) - angleRange / 2);
 
-    float foldAngle = (nextAngle + currentAngle) / 2.0;
-    float prevFoldAngle = (currentAngle + previousAngle) / 2.0;
-
-    ofVec2f angleVec = ofVec2f(1, 0).getRotated(nextAngle);
+    float angleOffset = ofRandom(90, 160) * (ofRandomf() > 0 ? -1 : 1);
+    nextAngle = currentAngle + angleOffset;
+    nextAngle = ofWrapDegrees(nextAngle);
+    if (length < 0) {
+      nextAngle = currentAngle + 180;
+    }
+    ofVec2f angleVec = ofVec2f(1, 0).getRotated(currentAngle);
     ofVec2f angleVecPerp = angleVec.getPerpendicular();
 
     ofVec2f prevAngleVec = ofVec2f(1, 0).getRotated(previousAngle);
-    ofVec2f prevAngleVecPerp = angleVec.getPerpendicular();
+    ofVec2f prevAngleVecPerp = prevAngleVec.getPerpendicular();
+
+    float foldAngle = (nextAngle + currentAngle) / 2.0;
+    foldAngle += 90;
+    float prevFoldAngle = (currentAngle + previousAngle) / 2.0;
+    prevFoldAngle += 90;
 
     ofVec2f foldAngleVecPerp =
         ofVec2f(1, 0).getRotated(foldAngle).getPerpendicular();
@@ -70,8 +72,10 @@ void ofApp::draw(
         ofVec2f(1, 0).getRotated(prevFoldAngle).getPerpendicular();
 
     ofPoint endPoint = startPoint + stripLength * angleVec;
-
-    // cout << prevFoldAngle << "\n";
+    ofRectangle BoundingBox = ofRectangle(0, 0, ofGetWidth(), ofGetHeight());
+    if (!BoundingBox.inside(endPoint) && attempts++ < 100) {
+      goto draw;
+    }
 
     float hypotenuseStart =
         (stripWidth / 2) / cos(ofDegToRad(prevFoldAngle - previousAngle));
@@ -87,16 +91,36 @@ void ofApp::draw(
     ofBeginShape();
 
     ofVertex(leftStart);
+    ofVertex(rightEnd);
+
     ofVertex(leftEnd);
 
-    ofVertex(rightEnd);
     ofVertex(rightStart);
     ofEndShape();
 
-    ofSetColor(255);
-    // ofDrawLine(leftStart, leftEnd);
-    // ofDrawLine(rightStart, rightEnd);
-    // ofDrawLine(startPoint, endPoint);
+    if (debug) {
+
+      ofSetColor(255);
+
+      ofDrawLine(startPoint + angleVecPerp * stripWidth / 2,
+                 endPoint + angleVecPerp * stripWidth / 2);
+      ofDrawLine(startPoint - angleVecPerp * stripWidth / 2,
+                 endPoint - angleVecPerp * stripWidth / 2);
+
+      ofSetColor(100);
+
+      ofDrawLine(startPoint, endPoint);
+
+      ofSetColor(220, 20, 200);
+
+      ofDrawLine(endPoint + foldAngleVecPerp * stripWidth,
+                 endPoint - foldAngleVecPerp * stripWidth);
+
+      // ofSetColor(20, 20, 250);
+
+      // ofDrawLine(startPoint + foldAngleVecPerp * stripWidth,
+      //            startPoint - foldAngleVecPerp * stripWidth);
+    }
 
     // advance
     startPoint = endPoint;
@@ -104,11 +128,9 @@ void ofApp::draw(
     previousAngle = currentAngle;
     currentAngle = nextAngle;
 
-    // float rectWidth = ofMap(k, 0, 10, 8, w);
-
-    // if (ofRandom(0, 1) < .99) {
-    //   ofDrawRectangle(x + w / 2, y + h / 2, rectWidth, rectWidth);
-    // }
+    if (length < 0) {
+      break;
+    }
   }
 }
 
