@@ -7,6 +7,9 @@ void ofApp::setup() {}
 void ofApp::update() {}
 
 //--------------------------------------------------------------
+
+ofColor topColor = ofColor::fromHex(0x0B1021);
+ofColor bottomColor = ofColor::fromHex(0x131E53);
 void ofApp::draw(
 
 ) {
@@ -17,7 +20,7 @@ void ofApp::draw(
   float h = (750 - 50) / 5.0;
 
   ofSeedRandom(mouseX * 1000);
-  ofPoint startPoint = ofPoint(ofGetWidth() / 2, ofGetHeight() / 2);
+  ofPoint startPoint = ofPoint(mouseX, mouseY);
   //   float x = 200;
   //   float y = 200;
   float stripWidth = 50;
@@ -25,11 +28,16 @@ void ofApp::draw(
   float length = 3000;
   float angleRange = 80;
 
-  float angle = 0; // degrees
+  float previousAngle = ofRandom(0, 360); // degrees
+  float currentAngle = previousAngle;
+  float nextAngle = previousAngle;
+
+  // float previousAngle = angle;
+
   int side = 0;
   while (true) {
 
-    float stripLength = stripWidth + ofRandom(0, 200);
+    float stripLength = stripWidth + ofRandom(0, 100);
 
     length -= stripLength;
     // cout << length << "\n";
@@ -37,30 +45,44 @@ void ofApp::draw(
       break;
     }
     if (side == 0) {
-      ofSetHexColor(0x0B1021); // top
+      ofSetColor(topColor, 200); // top
     } else {
-      ofSetHexColor(0x131E53); // bottom
+      ofSetColor(bottomColor, 200); // bottom
     }
     side = (side + 1) % 2;
 
-    // update the angle
-    angle = angle + ((random() * angleRange) - angleRange / 2);
-    // direction = ofVect2
-    ofVec2f angleVec = ofVec2f(1, 0).getRotated(angle);
+    // calculate next angle
+    nextAngle = currentAngle + ((ofRandomf() * angleRange) - angleRange / 2);
+
+    float foldAngle = (nextAngle + currentAngle) / 2.0;
+    float prevFoldAngle = (currentAngle + previousAngle) / 2.0;
+
+    ofVec2f angleVec = ofVec2f(1, 0).getRotated(nextAngle);
     ofVec2f angleVecPerp = angleVec.getPerpendicular();
+
+    ofVec2f prevAngleVec = ofVec2f(1, 0).getRotated(previousAngle);
+    ofVec2f prevAngleVecPerp = angleVec.getPerpendicular();
+
+    ofVec2f foldAngleVecPerp =
+        ofVec2f(1, 0).getRotated(foldAngle).getPerpendicular();
+
+    ofVec2f prevFoldAngleVecPerp =
+        ofVec2f(1, 0).getRotated(prevFoldAngle).getPerpendicular();
+
     ofPoint endPoint = startPoint + stripLength * angleVec;
-    // float endY = y;
 
-    ofDrawLine(startPoint, endPoint);
+    // cout << prevFoldAngle << "\n";
 
-    ofPoint leftStart = startPoint - angleVecPerp * stripWidth / 2;
-    ofPoint leftEnd = endPoint - angleVecPerp * stripWidth / 2;
+    float hypotenuseStart =
+        (stripWidth / 2) / cos(ofDegToRad(prevFoldAngle - previousAngle));
+    float hypotenuseEnd =
+        (stripWidth / 2) / cos(ofDegToRad(foldAngle - currentAngle));
 
-    ofPoint rightStart = startPoint + angleVecPerp * stripWidth / 2;
-    ofPoint rightEnd = endPoint + angleVecPerp * stripWidth / 2;
+    ofPoint leftStart = startPoint - prevFoldAngleVecPerp * hypotenuseStart;
+    ofPoint rightStart = startPoint + prevFoldAngleVecPerp * hypotenuseStart;
 
-    ofDrawLine(leftStart, leftEnd);
-    ofDrawLine(rightStart, rightEnd);
+    ofPoint leftEnd = endPoint - foldAngleVecPerp * hypotenuseEnd;
+    ofPoint rightEnd = endPoint + foldAngleVecPerp * hypotenuseEnd;
 
     ofBeginShape();
 
@@ -71,7 +93,16 @@ void ofApp::draw(
     ofVertex(rightStart);
     ofEndShape();
 
+    ofSetColor(255);
+    // ofDrawLine(leftStart, leftEnd);
+    // ofDrawLine(rightStart, rightEnd);
+    // ofDrawLine(startPoint, endPoint);
+
+    // advance
     startPoint = endPoint;
+
+    previousAngle = currentAngle;
+    currentAngle = nextAngle;
 
     // float rectWidth = ofMap(k, 0, 10, 8, w);
 
