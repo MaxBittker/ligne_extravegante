@@ -7,12 +7,14 @@ void ofApp::setup() {}
 void ofApp::update() {}
 
 //--------------------------------------------------------------
-const bool debug = true;
+const bool debug = false;
 ofColor topColor = ofColor::fromHex(0x0B1021);
 ofColor bottomColor = ofColor::fromHex(0x131E53);
+double t = 0;
 void ofApp::draw(
 
 ) {
+  t += 0.001;
 
   ofBackgroundHex(0xACB7EA);
 
@@ -34,8 +36,9 @@ draw:
   int side = 0;
   while (true) {
 
-    float stripLength = 25 + ofRandom(0, 200);
-
+    // float stripLength = 25 + ofRandom(0, 200);
+    float stripLength = 25 + (ofNoise(length / 1000 + 1000, t) * 200);
+    stripLength = min(length, stripLength);
     length -= stripLength;
     // cout << length << "\n";
 
@@ -47,11 +50,13 @@ draw:
     side = (side + 1) % 2;
 
     // calculate next angle
+    // float angleOffset = ofRandom(90, 160) * (ofRandomf() > 0 ? -1 : 1);
+    float angleOffset =
+        ((ofNoise(length / 1000, t) * 70) + 90) * (ofRandomf() > 0 ? -1 : 1);
 
-    float angleOffset = ofRandom(90, 160) * (ofRandomf() > 0 ? -1 : 1);
     nextAngle = currentAngle + angleOffset;
     nextAngle = ofWrapDegrees(nextAngle);
-    if (length < 0) {
+    if (length <= 0) {
       nextAngle = currentAngle + 180;
     }
     ofVec2f angleVec = ofVec2f(1, 0).getRotated(currentAngle);
@@ -128,7 +133,7 @@ draw:
     previousAngle = currentAngle;
     currentAngle = nextAngle;
 
-    if (length < 0) {
+    if (length <= 0) {
       break;
     }
   }
