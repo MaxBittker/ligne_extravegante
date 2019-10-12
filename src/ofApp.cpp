@@ -28,7 +28,7 @@ void ofApp::draw(
 
   float stripWidth = 50;
 
-  float length = 4000;
+  float length = 3000;
   int attempts = 0;
 draw:
 
@@ -43,7 +43,7 @@ draw:
   while (true) {
 
     // float stripLength = 25 + ofRandom(0, 200);
-    float stripLength = 25 + (ofNoise((n * 0.1) + 1000, t) * 200);
+    float stripLength = 25 + (ofNoise((n * 0.1) + 1000, t) * 300);
     stripLength = min(length, stripLength);
     length -= stripLength;
     // cout << length << "\n";
