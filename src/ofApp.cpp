@@ -8,13 +8,18 @@ void ofApp::update() {}
 
 //--------------------------------------------------------------
 const bool debug = false;
+const bool animation = true;
 ofColor topColor = ofColor::fromHex(0x0B1021);
 ofColor bottomColor = ofColor::fromHex(0x131E53);
+
 double t = 0;
 void ofApp::draw(
 
 ) {
-  t += 0.001;
+  if (animation) {
+
+    t += 0.001;
+  }
 
   ofBackgroundHex(0xACB7EA);
 
@@ -23,7 +28,7 @@ void ofApp::draw(
 
   float stripWidth = 50;
 
-  float length = 3000;
+  float length = 4000;
   int attempts = 0;
 draw:
 
@@ -34,25 +39,26 @@ draw:
   // float previousAngle = angle;
 
   int side = 0;
+  int n = 0;
   while (true) {
 
     // float stripLength = 25 + ofRandom(0, 200);
-    float stripLength = 25 + (ofNoise(length / 1000 + 1000, t) * 200);
+    float stripLength = 25 + (ofNoise((n * 0.1) + 1000, t) * 200);
     stripLength = min(length, stripLength);
     length -= stripLength;
     // cout << length << "\n";
 
     if (side == 0) {
-      ofSetColor(topColor, 220); // top
+      ofSetColor(topColor, 240); // top
     } else {
-      ofSetColor(bottomColor, 220); // bottom
+      ofSetColor(bottomColor, 240); // bottom
     }
     side = (side + 1) % 2;
 
     // calculate next angle
     // float angleOffset = ofRandom(90, 160) * (ofRandomf() > 0 ? -1 : 1);
-    float angleOffset =
-        ((ofNoise(length / 1000, t) * 70) + 90) * (ofRandomf() > 0 ? -1 : 1);
+    float angleOffset = ((ofRandom(0, 40) + ofNoise(n * 0.1, t) * 30) + 90) *
+                        (ofRandomf() > 0 ? -1 : 1);
 
     nextAngle = currentAngle + angleOffset;
     nextAngle = ofWrapDegrees(nextAngle);
@@ -79,6 +85,7 @@ draw:
     ofPoint endPoint = startPoint + stripLength * angleVec;
     ofRectangle BoundingBox = ofRectangle(0, 0, ofGetWidth(), ofGetHeight());
     if (!BoundingBox.inside(endPoint) && attempts++ < 100) {
+
       goto draw;
     }
 
@@ -132,7 +139,7 @@ draw:
 
     previousAngle = currentAngle;
     currentAngle = nextAngle;
-
+    n++;
     if (length <= 0) {
       break;
     }
