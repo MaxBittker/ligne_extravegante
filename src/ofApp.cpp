@@ -9,10 +9,13 @@ void ofApp::update() {}
 //--------------------------------------------------------------
 const bool debug = false;
 const bool animation = true;
-ofColor topColor = ofColor::fromHex(0x0B1021);
-ofColor bottomColor = ofColor::fromHex(0x131E53);
+ofColor topColor = ofColor::fromHex(0x10163B);
+ofColor bottomColor = ofColor::fromHex(0x182F63);
 
+float intialLength = 3000;
 double t = 0;
+ofPoint Center = ofPoint(0, 0);
+
 void ofApp::draw(
 
 ) {
@@ -30,7 +33,7 @@ void ofApp::draw(
 
   float length = 3000;
   int attempts = 0;
-draw:
+  // draw:
 
   float previousAngle = ofNoise(t) * 360; // degrees
   float currentAngle = previousAngle + 180;
@@ -49,9 +52,9 @@ draw:
     // cout << length << "\n";
 
     if (side == 0) {
-      ofSetColor(topColor, 240); // top
+      ofSetColor(topColor, 250); // top
     } else {
-      ofSetColor(bottomColor, 240); // bottom
+      ofSetColor(bottomColor, 250); // bottom
     }
     side = (side + 1) % 2;
 
@@ -111,7 +114,12 @@ draw:
     ofVertex(leftEnd);
 
     ofVertex(rightStart);
+
     ofEndShape();
+    ofSetColor(topColor);
+    ofDrawLine(leftStart, rightEnd);
+    ofSetColor(bottomColor);
+    ofDrawLine(rightStart, leftEnd);
 
     if (debug) {
 
@@ -147,6 +155,7 @@ draw:
       break;
     }
   }
+  ofPopMatrix();
 }
 
 //--------------------------------------------------------------
