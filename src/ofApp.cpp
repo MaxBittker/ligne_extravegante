@@ -32,7 +32,7 @@ void ofApp::draw(
   int attempts = 0;
 draw:
 
-  float previousAngle = ofRandom(0, 360); // degrees
+  float previousAngle = ofNoise(t) * 360; // degrees
   float currentAngle = previousAngle + 180;
   float nextAngle = previousAngle;
 
@@ -43,7 +43,7 @@ draw:
   while (true) {
 
     // float stripLength = 25 + ofRandom(0, 200);
-    float stripLength = 25 + (ofNoise((n * 0.1) + 1000, t) * 300);
+    float stripLength = 25 + (ofNoise((n * 0.3) + 1000, t) * 300);
     stripLength = min(length, stripLength);
     length -= stripLength;
     // cout << length << "\n";
@@ -57,19 +57,22 @@ draw:
 
     // calculate next angle
     // float angleOffset = ofRandom(90, 160) * (ofRandomf() > 0 ? -1 : 1);
-    float angleOffset = ((ofRandom(0, 40) + ofNoise(n * 0.1, t) * 30) + 90) *
+    float angleOffset = ((ofRandom(0, 40) + ofNoise(n * 0.3, t) * 30) + 90) *
                         (ofRandomf() > 0 ? -1 : 1);
 
     nextAngle = currentAngle + angleOffset;
     nextAngle = ofWrapDegrees(nextAngle);
+    // cout << angleOffset << "\n";
+
     if (length <= 0) {
       nextAngle = currentAngle + 180;
     }
+
     ofVec2f angleVec = ofVec2f(1, 0).getRotated(currentAngle);
     ofVec2f angleVecPerp = angleVec.getPerpendicular();
 
-    ofVec2f prevAngleVec = ofVec2f(1, 0).getRotated(previousAngle);
-    ofVec2f prevAngleVecPerp = prevAngleVec.getPerpendicular();
+    // ofVec2f prevAngleVec = ofVec2f(1, 0).getRotated(previousAngle);
+    // ofVec2f prevAngleVecPerp = prevAngleVec.getPerpendicular();
 
     float foldAngle = (nextAngle + currentAngle) / 2.0;
     foldAngle += 90;
@@ -86,7 +89,7 @@ draw:
     ofRectangle BoundingBox = ofRectangle(0, 0, ofGetWidth(), ofGetHeight());
     if (!BoundingBox.inside(endPoint) && attempts++ < 100) {
 
-      goto draw;
+      // goto draw;
     }
 
     float hypotenuseStart =
